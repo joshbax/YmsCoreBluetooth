@@ -131,6 +131,17 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 - (instancetype)initWithKnownPeripheralNames:(NSArray *)nameList queue:(dispatch_queue_t)queue useStoredPeripherals:(BOOL)useStore delegate:(id<CBCentralManagerDelegate>) delegate;
 
+/**
+ Constructor with array of known peripheral names.
+ @param nameList Array of peripheral names of type NSString.
+ @param queue The dispatch queue to use to dispatch the central role events.
+ If its value is nil, the central manager dispatches central role events using the main queue.
+ @param useStore If YES, then discovered peripheral UUIDs are stored in standardUserDefaults.
+ @param centralManagerOptions dictonary of options passed to CBCentralManager:initWithDelegate:options:
+ @param delegate Delegate of this class instance.
+ */
+- (instancetype)initWithKnownPeripheralNames:(NSArray *)nameList queue:(dispatch_queue_t)queue useStoredPeripherals:(BOOL)useStore options:(NSDictionary*)centralManagerOptions delegate:(id<CBCentralManagerDelegate>) delegate;
+
 #pragma mark - Peripheral Management
 /** @name Peripheral Management */
 /**

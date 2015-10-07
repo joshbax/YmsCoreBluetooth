@@ -44,7 +44,7 @@ NSString *const YMSCBVersion = @"" kYMSCBVersion;
 
 #pragma mark - Constructors
 
-- (instancetype)initWithKnownPeripheralNames:(NSArray *)nameList queue:(dispatch_queue_t)queue delegate:(id<CBCentralManagerDelegate>) delegate; {
+- (instancetype)initWithKnownPeripheralNames:(NSArray *)nameList queue:(dispatch_queue_t)queue delegate:(id<CBCentralManagerDelegate>) delegate {
     self = [super init];
     
     if (self) {
@@ -68,6 +68,25 @@ NSString *const YMSCBVersion = @"" kYMSCBVersion;
         _ymsPeripherals = [NSMutableArray new];
         _delegate = delegate;
         _manager = [[CBCentralManager alloc] initWithDelegate:self queue:queue];
+        _knownPeripheralNames = nameList;
+        _discoveredCallback = nil;
+        _retrievedCallback = nil;
+        _useStoredPeripherals = useStore;
+    }
+    
+    if (useStore) {
+        [YMSCBStoredPeripherals initializeStorage];
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithKnownPeripheralNames:(NSArray *)nameList queue:(dispatch_queue_t)queue useStoredPeripherals:(BOOL)useStore options:(NSDictionary*)centralManagerOptions delegate:(id<CBCentralManagerDelegate>) delegate {
+    self = [super init];
+    if (self) {
+        _ymsPeripherals = [NSMutableArray new];
+        _delegate = delegate;
+        _manager = [[CBCentralManager alloc] initWithDelegate:self queue:queue options:centralManagerOptions];
         _knownPeripheralNames = nameList;
         _discoveredCallback = nil;
         _retrievedCallback = nil;
@@ -287,6 +306,15 @@ NSString *const YMSCBVersion = @"" kYMSCBVersion;
 }
 
 
+- (void)centralManager:(CBCentralManager *)central willRestoreState:(NSDictionary<NSString *, id> *)dict; {
+    __weak YMSCBCentralManager *this = self;
+    _YMS_PERFORM_ON_MAIN_THREAD(^{
+        if ([this.delegate respondsToSelector:@selector(centralManager:willRestoreState:)]) {
+            [this.delegate centralManager:central
+                    willRestoreState:dict];
+        }
+    });
+}
 
 - (void)centralManager:(CBCentralManager *)central
  didDiscoverPeripheral:(CBPeripheral *)peripheral
